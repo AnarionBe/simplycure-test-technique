@@ -10,7 +10,11 @@ import {
 } from "react";
 import Toast, { type ToastData } from "@/components/Toast";
 import { withDiscount } from "@/lib/format";
-import type { CartLine, Recommendation } from "@/types/recommendation";
+import type {
+  CartLine,
+  Product,
+  Recommendation,
+} from "@/types/recommendation";
 
 const STORAGE_KEY = "simplycure.cart.v1";
 
@@ -26,6 +30,13 @@ interface CartContextValue {
   isAdded: (recId: string) => boolean;
   /** Ajoute tous les produits d'une recommandation + déclenche un toast */
   addRecommendation: (rec: Recommendation, message: string) => void;
+  /** Ajoute un seul produit d'une recommandation, avec quantité */
+  addProduct: (
+    rec: Recommendation,
+    product: Product,
+    quantity: number,
+    message: string,
+  ) => void;
   /** Affiche un toast sans toucher au panier */
   notify: (message: string) => void;
   /** Vide le panier (bouton "Réinitialiser la démo") */
@@ -102,6 +113,32 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     [notify],
   );
 
+  const addProduct = useCallback(
+    (
+      rec: Recommendation,
+      product: Product,
+      quantity: number,
+      message: string,
+    ) => {
+      setCart((prev) => [
+        ...prev,
+        {
+          productId: product.id,
+          name: product.name,
+          unitPrice: withDiscount(product.price, rec.practitioner.discountRate),
+          quantity,
+          recommendationId: rec.id,
+          practitionerName: rec.practitioner.name,
+        },
+      ]);
+      setAddedRecIds((prev) =>
+        prev.includes(rec.id) ? prev : [...prev, rec.id],
+      );
+      notify(message);
+    },
+    [notify],
+  );
+
   const reset = useCallback(() => {
     setCart([]);
     setAddedRecIds([]);
@@ -109,8 +146,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const value = useMemo<CartContextValue>(
-    () => ({ cart, cartCount, isAdded, addRecommendation, notify, reset }),
-    [cart, cartCount, isAdded, addRecommendation, notify, reset],
+    () => ({
+      cart,
+      cartCount,
+      isAdded,
+      addRecommendation,
+      addProduct,
+      notify,
+      reset,
+    }),
+    [cart, cartCount, isAdded, addRecommendation, addProduct, notify, reset],
   );
 
   return (
