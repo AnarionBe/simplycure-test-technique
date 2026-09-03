@@ -1,18 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   AlertTriangle,
   ArrowRight,
-  ArrowUpRight,
   Check,
   ShieldCheck,
   Sparkles,
   Pill,
   Clock,
   CalendarDays,
-  RotateCcw,
 } from "lucide-react";
 import type { CartState, Recommendation } from "@/types/recommendation";
 import { formatEuro } from "@/lib/format";
@@ -20,8 +18,6 @@ import { formatEuro } from "@/lib/format";
 interface RecommendationCardProps {
   recommendation: Recommendation;
   cartState: CartState;
-  onRefill: (rec: Recommendation) => void;
-  onViewCart: () => void;
 }
 
 /* ── Badge de statut ─────────────────────────────────────────── */
@@ -141,8 +137,6 @@ function PriceSummary({
 export default function RecommendationCard({
   recommendation: rec,
   cartState,
-  onRefill,
-  onViewCart,
 }: RecommendationCardProps) {
   const added = cartState === "added";
   const rate = rec.practitioner.discountRate;
@@ -268,111 +262,15 @@ export default function RecommendationCard({
         emphasis={rec.status === "REFILL_DUE" ? "amber" : "dark"}
       />
 
-      {/* 4 · Action (footer) */}
+      {/* 4 · Action unique (footer) — identique pour tous les statuts */}
       <div className="mt-auto pt-4">
-        <AnimatePresence mode="wait" initial={false}>
-          {added ? (
-            <motion.div
-              key="added"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              className="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3"
-            >
-              <span className="flex items-center gap-2 text-sm font-semibold text-emerald-800">
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-600 text-white">
-                  <Check className="h-3.5 w-3.5" />
-                </span>
-                {rec.status === "REFILL_DUE"
-                  ? "Refill ajouté au panier"
-                  : rec.status === "COMPLETED"
-                    ? "Cure rachetée — ajoutée au panier"
-                    : "Recommandation ajoutée au panier"}
-              </span>
-              <button
-                onClick={onViewCart}
-                className="text-sm font-medium text-emerald-700 underline-offset-2 hover:underline"
-              >
-                Voir le panier
-              </button>
-            </motion.div>
-          ) : rec.status === "NEW" ? (
-            <motion.div
-              key="new"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <Link
-                href={detailHref}
-                className="group flex w-full items-center justify-center gap-2 rounded-xl bg-forest-900 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-forest-800"
-              >
-                Consulter &amp; commander
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-              </Link>
-            </motion.div>
-          ) : rec.status === "IN_PROGRESS" ? (
-            <motion.div
-              key="progress"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <Link
-                href={detailHref}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:border-slate-400 hover:bg-slate-50"
-              >
-                Voir posologies &amp; détails
-              </Link>
-            </motion.div>
-          ) : rec.status === "COMPLETED" ? (
-            <motion.div
-              key="completed"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <Link
-                href={detailHref}
-                className="group flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-300 bg-white px-4 py-3 text-sm font-semibold text-emerald-800 transition-colors hover:border-emerald-400 hover:bg-emerald-50"
-              >
-                <RotateCcw className="h-4 w-4" />
-                Racheter cette cure
-                <span className="rounded-md bg-emerald-100 px-1.5 py-0.5 text-xs font-bold text-emerald-800">
-                  {rec.practitioner.discountLabel}
-                </span>
-              </Link>
-            </motion.div>
-          ) : (
-            <motion.button
-              key="refill"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => onRefill(rec)}
-              className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700"
-            >
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-400 text-amber-900">
-                <Sparkles className="h-3 w-3" />
-              </span>
-              Prolonger / Refill en 1-Clic
-              <span className="rounded-md bg-white/15 px-1.5 py-0.5 text-xs font-bold">
-                {rec.practitioner.discountLabel} appliqué
-              </span>
-            </motion.button>
-          )}
-        </AnimatePresence>
-
-        {/* Lien vers la page dédiée quand l'action principale ne l'ouvre pas déjà */}
-        {(added || rec.status === "REFILL_DUE") && (
-          <Link
-            href={detailHref}
-            className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-800"
-          >
-            Ouvrir la recommandation
-            <ArrowUpRight className="h-3.5 w-3.5" />
-          </Link>
-        )}
+        <Link
+          href={detailHref}
+          className="group flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-forest-900 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-forest-800"
+        >
+          Ouvrir la recommandation
+          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+        </Link>
       </div>
     </motion.article>
   );

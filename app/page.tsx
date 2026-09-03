@@ -6,13 +6,8 @@ import { RotateCcw, Sparkles, PackageOpen } from "lucide-react";
 import Header from "@/components/Header";
 import RecommendationCard from "@/components/RecommendationCard";
 import { recommendations as ALL_RECS } from "@/data/mockData";
-import { shortDoctor } from "@/lib/format";
 import { useCart } from "@/lib/cart";
-import type {
-  NavTab,
-  Recommendation,
-  RecommendationFilter,
-} from "@/types/recommendation";
+import type { NavTab, RecommendationFilter } from "@/types/recommendation";
 
 const FILTERS: { id: RecommendationFilter; label: string }[] = [
   { id: "ALL", label: "Toutes" },
@@ -23,7 +18,7 @@ const FILTERS: { id: RecommendationFilter; label: string }[] = [
 ];
 
 export default function Home() {
-  const { cartCount, isAdded, addRecommendation, notify, reset } = useCart();
+  const { cartCount, isAdded, reset } = useCart();
   const [activeTab, setActiveTab] = useState<NavTab>("recommandations");
   const [filter, setFilter] = useState<RecommendationFilter>("ALL");
 
@@ -44,31 +39,10 @@ export default function Home() {
     [filter],
   );
 
-  const handleRefill = useCallback(
-    (rec: Recommendation) => {
-      const productName = rec.products[0]?.name ?? "Produit";
-      addRecommendation(
-        rec,
-        `${productName} ajouté à votre panier avec l'avantage du ${shortDoctor(
-          rec.practitioner.name,
-        )} !`,
-      );
-    },
-    [addRecommendation],
-  );
-
   const resetDemo = useCallback(() => {
     reset();
     setFilter("ALL");
   }, [reset]);
-
-  const viewCart = useCallback(
-    () =>
-      notify(
-        `Votre panier contient ${cartCount} article${cartCount > 1 ? "s" : ""}.`,
-      ),
-    [notify, cartCount],
-  );
 
   return (
     <>
@@ -173,8 +147,6 @@ export default function Home() {
                     key={rec.id}
                     recommendation={rec}
                     cartState={isAdded(rec.id) ? "added" : "idle"}
-                    onRefill={handleRefill}
-                    onViewCart={viewCart}
                   />
                 ))}
               </AnimatePresence>
