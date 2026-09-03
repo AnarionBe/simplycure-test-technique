@@ -112,7 +112,7 @@ export const recommendations: Recommendation[] = [
   {
     id: "rec-magnesium-refill",
     status: "REFILL_DUE",
-    statusLabel: "Renouvellement requis",
+    statusLabel: "À renouveler",
     date: "05/08/2026",
     practitioner: drDeBona,
     practitionerNote:

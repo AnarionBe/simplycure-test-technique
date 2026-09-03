@@ -5,12 +5,10 @@ import { AnimatePresence, motion } from "framer-motion";
 import { RotateCcw, Sparkles, PackageOpen } from "lucide-react";
 import Header from "@/components/Header";
 import RecommendationCard from "@/components/RecommendationCard";
-import DetailModal from "@/components/DetailModal";
-import Toast, { type ToastData } from "@/components/Toast";
 import { recommendations as ALL_RECS } from "@/data/mockData";
-import { withDiscount } from "@/lib/format";
+import { shortDoctor } from "@/lib/format";
+import { useCart } from "@/lib/cart";
 import type {
-  CartLine,
   NavTab,
   Recommendation,
   RecommendationFilter,
@@ -24,23 +22,10 @@ const FILTERS: { id: RecommendationFilter; label: string }[] = [
   { id: "COMPLETED", label: "Terminées" },
 ];
 
-/** "Dr. Marco De Bona" -> "Dr. De Bona" */
-function shortDoctor(fullName: string): string {
-  return `Dr. ${fullName.split(" ").slice(-2).join(" ")}`;
-}
-
 export default function Home() {
-  const [cart, setCart] = useState<CartLine[]>([]);
-  const [addedRecIds, setAddedRecIds] = useState<Set<string>>(new Set());
+  const { cartCount, isAdded, addRecommendation, notify, reset } = useCart();
   const [activeTab, setActiveTab] = useState<NavTab>("recommandations");
   const [filter, setFilter] = useState<RecommendationFilter>("ALL");
-  const [detailRec, setDetailRec] = useState<Recommendation | null>(null);
-  const [toast, setToast] = useState<ToastData | null>(null);
-
-  const cartCount = useMemo(
-    () => cart.reduce((n, line) => n + line.quantity, 0),
-    [cart],
-  );
 
   const counts = useMemo(
     () => ({
@@ -55,67 +40,35 @@ export default function Home() {
 
   const visibleRecs = useMemo(
     () =>
-      filter === "ALL"
-        ? ALL_RECS
-        : ALL_RECS.filter((r) => r.status === filter),
+      filter === "ALL" ? ALL_RECS : ALL_RECS.filter((r) => r.status === filter),
     [filter],
-  );
-
-  const addRecToCart = useCallback(
-    (rec: Recommendation, message: string) => {
-      setCart((prev) => {
-        const lines: CartLine[] = rec.products.map((p) => ({
-          productId: p.id,
-          name: p.name,
-          unitPrice: withDiscount(p.price, rec.practitioner.discountRate),
-          quantity: 1,
-          recommendationId: rec.id,
-          practitionerName: rec.practitioner.name,
-        }));
-        return [...prev, ...lines];
-      });
-      setAddedRecIds((prev) => new Set(prev).add(rec.id));
-      setToast({ id: Date.now(), message });
-    },
-    [],
   );
 
   const handleRefill = useCallback(
     (rec: Recommendation) => {
       const productName = rec.products[0]?.name ?? "Produit";
-      addRecToCart(
+      addRecommendation(
         rec,
         `${productName} ajouté à votre panier avec l'avantage du ${shortDoctor(
           rec.practitioner.name,
         )} !`,
       );
-      setDetailRec(null);
     },
-    [addRecToCart],
-  );
-
-  const handleAddToCart = useCallback(
-    (rec: Recommendation) => {
-      const doctor = shortDoctor(rec.practitioner.name);
-      const message =
-        rec.status === "COMPLETED"
-          ? `Cure « ${rec.products[0]?.name} » relancée et ajoutée à votre panier avec l'avantage du ${doctor} !`
-          : `Recommandation du ${doctor} ajoutée à votre panier (${rec.products.length} produit${
-              rec.products.length > 1 ? "s" : ""
-            }, ${rec.practitioner.discountLabel} appliqué)`;
-      addRecToCart(rec, message);
-      setDetailRec(null);
-    },
-    [addRecToCart],
+    [addRecommendation],
   );
 
   const resetDemo = useCallback(() => {
-    setCart([]);
-    setAddedRecIds(new Set());
-    setToast(null);
-    setDetailRec(null);
+    reset();
     setFilter("ALL");
-  }, []);
+  }, [reset]);
+
+  const viewCart = useCallback(
+    () =>
+      notify(
+        `Votre panier contient ${cartCount} article${cartCount > 1 ? "s" : ""}.`,
+      ),
+    [notify, cartCount],
+  );
 
   return (
     <>
@@ -219,13 +172,9 @@ export default function Home() {
                   <RecommendationCard
                     key={rec.id}
                     recommendation={rec}
-                    cartState={addedRecIds.has(rec.id) ? "added" : "idle"}
-                    onOpenDetail={setDetailRec}
+                    cartState={isAdded(rec.id) ? "added" : "idle"}
                     onRefill={handleRefill}
-                    onViewCart={() => setToast({
-                      id: Date.now(),
-                      message: `Votre panier contient ${cartCount} article${cartCount > 1 ? "s" : ""}.`,
-                    })}
+                    onViewCart={viewCart}
                   />
                 ))}
               </AnimatePresence>
@@ -233,26 +182,6 @@ export default function Home() {
           </>
         )}
       </main>
-
-      <DetailModal
-        recommendation={detailRec}
-        cartState={
-          detailRec && addedRecIds.has(detailRec.id) ? "added" : "idle"
-        }
-        onClose={() => setDetailRec(null)}
-        onAddToCart={handleAddToCart}
-        onRefill={handleRefill}
-        onViewCart={() =>
-          setToast({
-            id: Date.now(),
-            message: `Votre panier contient ${cartCount} article${
-              cartCount > 1 ? "s" : ""
-            }.`,
-          })
-        }
-      />
-
-      <Toast toast={toast} onDismiss={() => setToast(null)} />
     </>
   );
 }

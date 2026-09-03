@@ -10,3 +10,8 @@ export function formatEuro(value: number): string {
 export function withDiscount(price: number, rate: number): number {
   return Math.round(price * (1 - rate) * 100) / 100;
 }
+
+/** "Dr. Marco De Bona" -> "Dr. De Bona" */
+export function shortDoctor(fullName: string): string {
+  return `Dr. ${fullName.split(" ").slice(-2).join(" ")}`;
+}

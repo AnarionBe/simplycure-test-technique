@@ -1,9 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   AlertTriangle,
   ArrowRight,
+  ArrowUpRight,
   Check,
   ShieldCheck,
   Sparkles,
@@ -18,7 +20,6 @@ import { formatEuro } from "@/lib/format";
 interface RecommendationCardProps {
   recommendation: Recommendation;
   cartState: CartState;
-  onOpenDetail: (rec: Recommendation) => void;
   onRefill: (rec: Recommendation) => void;
   onViewCart: () => void;
 }
@@ -131,7 +132,7 @@ function PriceSummary({
         }`}
       >
         <Sparkles className="h-3.5 w-3.5" />
-        {rec.practitioner.discountLabel} avantage praticien
+        {rec.practitioner.discountLabel} praticien
       </span>
     </div>
   );
@@ -140,12 +141,12 @@ function PriceSummary({
 export default function RecommendationCard({
   recommendation: rec,
   cartState,
-  onOpenDetail,
   onRefill,
   onViewCart,
 }: RecommendationCardProps) {
   const added = cartState === "added";
   const rate = rec.practitioner.discountRate;
+  const detailHref = `/recommandations/${rec.id}`;
 
   return (
     <motion.article
@@ -180,7 +181,12 @@ export default function RecommendationCard({
         <StatusBadge rec={rec} />
       </div>
 
-      {/* Produits */}
+      {/* 1 · Note du médecin (scrollable si longue) */}
+      <div className="mt-3 max-h-28 overflow-y-auto overscroll-contain rounded-lg bg-slate-50 px-3 py-2 text-[13px] italic leading-snug text-slate-600 [scrollbar-width:thin]">
+        « {rec.practitionerNote} »
+      </div>
+
+      {/* 2 · Liste des produits */}
       <div className="mt-3 divide-y divide-slate-100 border-y border-slate-100">
         {rec.products.map((p) => (
           <ProductRow
@@ -198,31 +204,19 @@ export default function RecommendationCard({
         ))}
       </div>
 
-      {/* ── Corps spécifique au statut ─────────────────────────── */}
-
-      {/* NEW */}
-      {rec.status === "NEW" && (
-        <>
-          <p className="mt-3 line-clamp-2 rounded-lg bg-slate-50 px-3 py-2.5 text-sm italic text-slate-600">
-            « {rec.practitionerNote} »
-          </p>
-          <PriceSummary rec={rec} emphasis="dark" />
-        </>
-      )}
-
-      {/* IN_PROGRESS */}
+      {/* Détail contextuel selon le statut */}
       {rec.status === "IN_PROGRESS" && rec.progress && (
-        <div className="mt-4">
-          <div className="mb-1.5 flex items-center justify-between text-xs">
+        <div className="mt-3">
+          <div className="mb-1 flex items-center justify-between text-[11px]">
             <span className="font-medium text-slate-600">
-              Jour {rec.progress.currentDay} sur {rec.progress.totalDays}
+              Jour {rec.progress.currentDay} / {rec.progress.totalDays}
             </span>
             <span className="flex items-center gap-1 text-slate-400">
               <Clock className="h-3 w-3" />
-              Fin du pot dans {rec.progress.daysRemaining} jours
+              Fin du pot dans {rec.progress.daysRemaining} j
             </span>
           </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-blue-100">
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-blue-100">
             <motion.div
               className="h-full rounded-full bg-blue-600"
               initial={{ width: 0 }}
@@ -232,80 +226,49 @@ export default function RecommendationCard({
               transition={{ duration: 0.7, ease: "easeOut" }}
             />
           </div>
-          {rec.products[0]?.posology && (
-            <p className="mt-2.5 inline-flex items-center gap-1.5 rounded-md bg-slate-50 px-2 py-1 text-xs text-slate-500">
-              <Pill className="h-3.5 w-3.5" />
-              Posologie : {rec.products[0].posology.label}
-            </p>
-          )}
         </div>
       )}
 
-      {/* REFILL_DUE */}
       {rec.status === "REFILL_DUE" && rec.refill && (
-        <div className="mt-4 space-y-3">
-          <div className="flex items-start gap-2.5 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5">
-            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-amber-900">
-                {rec.refill.alertLabel}
-              </p>
-              <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-amber-200">
-                <motion.div
-                  className="h-full rounded-full bg-amber-500"
-                  initial={{ width: 0 }}
-                  animate={{
-                    width: `${(rec.refill.currentDay / rec.refill.cycleDays) * 100}%`,
-                  }}
-                  transition={{ duration: 0.7, ease: "easeOut" }}
-                />
-              </div>
-            </div>
-          </div>
-          <p className="flex items-start gap-2 text-xs text-slate-600">
-            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-            <span>
-              <span className="text-emerald-700">✅</span>{" "}
-              {rec.refill.authorizationLabel}
-            </span>
+        <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
+          <p className="flex items-center gap-1.5 text-[13px] font-semibold text-amber-900">
+            <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-amber-600" />
+            {rec.refill.alertLabel}
           </p>
-          <PriceSummary rec={rec} emphasis="amber" />
-        </div>
-      )}
-
-      {/* COMPLETED */}
-      {rec.status === "COMPLETED" && (
-        <div className="mt-4">
-          <div className="flex items-start gap-2.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5">
-            <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white">
-              <Check className="h-3 w-3" />
-            </span>
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-emerald-900">
-                Cure terminée le {rec.completedDate}
-              </p>
-              <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-emerald-200">
-                <div className="h-full w-full rounded-full bg-emerald-500" />
-              </div>
-              {rec.progress && (
-                <p className="mt-1 text-xs text-emerald-700">
-                  {rec.progress.totalDays} jours suivis · Jour{" "}
-                  {rec.progress.currentDay}/{rec.progress.totalDays}
-                </p>
-              )}
-            </div>
+          <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-amber-200">
+            <motion.div
+              className="h-full rounded-full bg-amber-500"
+              initial={{ width: 0 }}
+              animate={{
+                width: `${(rec.refill.currentDay / rec.refill.cycleDays) * 100}%`,
+              }}
+              transition={{ duration: 0.7, ease: "easeOut" }}
+            />
           </div>
-          {rec.products[0]?.posology && (
-            <p className="mt-2.5 inline-flex items-center gap-1.5 rounded-md bg-slate-50 px-2 py-1 text-xs text-slate-500">
-              <Pill className="h-3.5 w-3.5" />
-              Posologie suivie : {rec.products[0].posology.label}
-            </p>
-          )}
-          <PriceSummary rec={rec} emphasis="dark" />
+          <p className="mt-1.5 flex items-center gap-1 text-[11px] text-amber-800">
+            <ShieldCheck className="h-3 w-3 shrink-0 text-emerald-600" />
+            Refill {rec.refill.currentRefillIndex}/{rec.refill.authorizedRefills}{" "}
+            autorisé par le praticien
+          </p>
         </div>
       )}
 
-      {/* ── Pied : action ─────────────────────────────────────── */}
+      {rec.status === "COMPLETED" && (
+        <div className="mt-3 flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-[13px] font-medium text-emerald-800">
+          <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white">
+            <Check className="h-3 w-3" />
+          </span>
+          Cure terminée le {rec.completedDate}
+        </div>
+      )}
+
+      {/* 3 · Total */}
+      <PriceSummary
+        rec={rec}
+        emphasis={rec.status === "REFILL_DUE" ? "amber" : "dark"}
+      />
+
+      {/* 4 · Action (footer) */}
       <div className="mt-auto pt-4">
         <AnimatePresence mode="wait" initial={false}>
           {added ? (
@@ -334,43 +297,52 @@ export default function RecommendationCard({
               </button>
             </motion.div>
           ) : rec.status === "NEW" ? (
-            <motion.button
+            <motion.div
               key="new"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => onOpenDetail(rec)}
-              className="group flex w-full items-center justify-center gap-2 rounded-xl bg-forest-900 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-forest-800"
             >
-              Consulter &amp; commander
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-            </motion.button>
+              <Link
+                href={detailHref}
+                className="group flex w-full items-center justify-center gap-2 rounded-xl bg-forest-900 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-forest-800"
+              >
+                Consulter &amp; commander
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+            </motion.div>
           ) : rec.status === "IN_PROGRESS" ? (
-            <motion.button
+            <motion.div
               key="progress"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => onOpenDetail(rec)}
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:border-slate-400 hover:bg-slate-50"
             >
-              Voir posologies &amp; détails
-            </motion.button>
+              <Link
+                href={detailHref}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:border-slate-400 hover:bg-slate-50"
+              >
+                Voir posologies &amp; détails
+              </Link>
+            </motion.div>
           ) : rec.status === "COMPLETED" ? (
-            <motion.button
+            <motion.div
               key="completed"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => onOpenDetail(rec)}
-              className="group flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-300 bg-white px-4 py-3 text-sm font-semibold text-emerald-800 transition-colors hover:border-emerald-400 hover:bg-emerald-50"
             >
-              <RotateCcw className="h-4 w-4" />
-              Racheter cette cure
-              <span className="rounded-md bg-emerald-100 px-1.5 py-0.5 text-xs font-bold text-emerald-800">
-                {rec.practitioner.discountLabel}
-              </span>
-            </motion.button>
+              <Link
+                href={detailHref}
+                className="group flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-300 bg-white px-4 py-3 text-sm font-semibold text-emerald-800 transition-colors hover:border-emerald-400 hover:bg-emerald-50"
+              >
+                <RotateCcw className="h-4 w-4" />
+                Racheter cette cure
+                <span className="rounded-md bg-emerald-100 px-1.5 py-0.5 text-xs font-bold text-emerald-800">
+                  {rec.practitioner.discountLabel}
+                </span>
+              </Link>
+            </motion.div>
           ) : (
             <motion.button
               key="refill"
@@ -390,6 +362,17 @@ export default function RecommendationCard({
             </motion.button>
           )}
         </AnimatePresence>
+
+        {/* Lien vers la page dédiée quand l'action principale ne l'ouvre pas déjà */}
+        {(added || rec.status === "REFILL_DUE") && (
+          <Link
+            href={detailHref}
+            className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-800"
+          >
+            Ouvrir la recommandation
+            <ArrowUpRight className="h-3.5 w-3.5" />
+          </Link>
+        )}
       </div>
     </motion.article>
   );
