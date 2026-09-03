@@ -212,7 +212,7 @@ export default function Home() {
             {/* Grille de cartes */}
             <motion.div
               layout
-              className="mt-6 grid grid-cols-1 items-start gap-5 md:grid-cols-2 xl:grid-cols-3"
+              className="mt-6 grid grid-cols-1 items-stretch gap-5 md:grid-cols-2 xl:grid-cols-3"
             >
               <AnimatePresence mode="popLayout">
                 {visibleRecs.map((rec) => (

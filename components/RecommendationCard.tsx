@@ -63,33 +63,37 @@ function ProductRow({
   discounted?: number;
 }) {
   return (
-    <div className="flex items-center gap-3 py-2">
+    <div className="flex items-center gap-2.5 py-1.5">
       <span
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-white"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-white"
         style={{ backgroundColor: accent }}
       >
-        <Pill className="h-5 w-5" />
+        <Pill className="h-3.5 w-3.5" />
       </span>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-slate-900">{name}</p>
+        <p className="truncate text-[13px] font-medium leading-tight text-slate-900">
+          {name}
+        </p>
         {brand && brand !== name && (
-          <p className="truncate text-xs text-slate-400">{brand}</p>
+          <p className="truncate text-[11px] leading-tight text-slate-400">
+            {brand}
+          </p>
         )}
       </div>
-      <div className="text-right">
+      <div className="flex items-baseline gap-1.5 text-right">
         {discounted != null && discounted !== price ? (
           <>
-            <p className="text-xs text-slate-400 line-through">
+            <span className="text-[11px] text-slate-400 line-through">
               {formatEuro(price)}
-            </p>
-            <p className="text-sm font-semibold text-slate-900">
+            </span>
+            <span className="text-[13px] font-semibold text-slate-900">
               {formatEuro(discounted)}
-            </p>
+            </span>
           </>
         ) : (
-          <p className="text-sm font-semibold text-slate-900">
+          <span className="text-[13px] font-semibold text-slate-900">
             {formatEuro(price)}
-          </p>
+          </span>
         )}
       </div>
     </div>
@@ -149,7 +153,7 @@ export default function RecommendationCard({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-      className={`relative overflow-hidden rounded-2xl border bg-white p-5 shadow-sm transition-colors ${
+      className={`relative flex h-full flex-col overflow-hidden rounded-2xl border bg-white p-5 shadow-sm transition-colors ${
         added
           ? "border-emerald-300 ring-1 ring-emerald-200"
           : rec.status === "REFILL_DUE"
@@ -177,7 +181,7 @@ export default function RecommendationCard({
       </div>
 
       {/* Produits */}
-      <div className="mt-4 divide-y divide-slate-100 border-y border-slate-100">
+      <div className="mt-3 divide-y divide-slate-100 border-y border-slate-100">
         {rec.products.map((p) => (
           <ProductRow
             key={p.id}
@@ -302,7 +306,7 @@ export default function RecommendationCard({
       )}
 
       {/* ── Pied : action ─────────────────────────────────────── */}
-      <div className="mt-4">
+      <div className="mt-auto pt-4">
         <AnimatePresence mode="wait" initial={false}>
           {added ? (
             <motion.div
