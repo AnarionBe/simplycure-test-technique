@@ -7,13 +7,15 @@ import {
   ArrowRight,
   Check,
   ShieldCheck,
-  Sparkles,
   Pill,
   Clock,
   CalendarDays,
 } from "lucide-react";
-import type { CartState, Recommendation } from "@/types/recommendation";
-import { formatEuro } from "@/lib/format";
+import type {
+  CartState,
+  Posology,
+  Recommendation,
+} from "@/types/recommendation";
 
 interface RecommendationCardProps {
   recommendation: Recommendation;
@@ -45,22 +47,18 @@ function StatusBadge({ rec }: { rec: Recommendation }) {
   );
 }
 
-/* ── Vignette produit ────────────────────────────────────────── */
+/* ── Produit + infos de prise ────────────────────────────────── */
 function ProductRow({
   name,
-  brand,
-  price,
   accent,
-  discounted,
+  posology,
 }: {
   name: string;
-  brand?: string;
-  price: number;
   accent: string;
-  discounted?: number;
+  posology?: Posology;
 }) {
   return (
-    <div className="flex items-center gap-2.5 py-1.5">
+    <div className="flex items-start gap-2.5 py-2">
       <span
         className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-white"
         style={{ backgroundColor: accent }}
@@ -71,65 +69,20 @@ function ProductRow({
         <p className="truncate text-[13px] font-medium leading-tight text-slate-900">
           {name}
         </p>
-        {brand && brand !== name && (
-          <p className="truncate text-[11px] leading-tight text-slate-400">
-            {brand}
-          </p>
+        {posology && (
+          <div className="mt-1 space-y-0.5">
+            <p className="flex items-center gap-1 text-[11px] leading-tight text-slate-500">
+              <Clock className="h-3 w-3 shrink-0 text-slate-400" />
+              {posology.label}
+            </p>
+            {posology.containerLabel && (
+              <p className="truncate text-[11px] leading-tight text-slate-400">
+                {posology.containerLabel}
+              </p>
+            )}
+          </div>
         )}
       </div>
-      <div className="flex items-baseline gap-1.5 text-right">
-        {discounted != null && discounted !== price ? (
-          <>
-            <span className="text-[11px] text-slate-400 line-through">
-              {formatEuro(price)}
-            </span>
-            <span className="text-[13px] font-semibold text-slate-900">
-              {formatEuro(discounted)}
-            </span>
-          </>
-        ) : (
-          <span className="text-[13px] font-semibold text-slate-900">
-            {formatEuro(price)}
-          </span>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/* ── Bloc prix récap ─────────────────────────────────────────── */
-function PriceSummary({
-  rec,
-  emphasis,
-}: {
-  rec: Recommendation;
-  emphasis: "dark" | "amber";
-}) {
-  return (
-    <div className="mt-3 flex items-end justify-between rounded-lg bg-slate-50 px-3 py-2.5">
-      <div>
-        <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
-          Total
-        </p>
-        <div className="flex items-baseline gap-2">
-          <span className="text-lg font-bold text-slate-900">
-            {formatEuro(rec.total)}
-          </span>
-          <span className="text-xs text-slate-400 line-through">
-            {formatEuro(rec.subtotal)}
-          </span>
-        </div>
-      </div>
-      <span
-        className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold ${
-          emphasis === "amber"
-            ? "bg-amber-100 text-amber-800"
-            : "bg-forest-50 text-forest-900"
-        }`}
-      >
-        <Sparkles className="h-3.5 w-3.5" />
-        {rec.practitioner.discountLabel} praticien
-      </span>
     </div>
   );
 }
@@ -139,7 +92,6 @@ export default function RecommendationCard({
   cartState,
 }: RecommendationCardProps) {
   const added = cartState === "added";
-  const rate = rec.practitioner.discountRate;
   const detailHref = `/recommandations/${rec.id}`;
 
   return (
@@ -186,14 +138,8 @@ export default function RecommendationCard({
           <ProductRow
             key={p.id}
             name={p.name}
-            brand={p.brand}
-            price={p.price}
             accent={p.accent}
-            discounted={
-              rec.status === "IN_PROGRESS"
-                ? undefined
-                : Math.round(p.price * (1 - rate) * 100) / 100
-            }
+            posology={p.posology}
           />
         ))}
       </div>
@@ -256,13 +202,7 @@ export default function RecommendationCard({
         </div>
       )}
 
-      {/* 3 · Total */}
-      <PriceSummary
-        rec={rec}
-        emphasis={rec.status === "REFILL_DUE" ? "amber" : "dark"}
-      />
-
-      {/* 4 · Action unique (footer) — identique pour tous les statuts */}
+      {/* 3 · Action unique (footer) — identique pour tous les statuts */}
       <div className="mt-auto pt-4">
         <Link
           href={detailHref}
