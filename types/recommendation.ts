@@ -110,6 +110,27 @@ export interface Recommendation {
   progress?: CureProgress;
   /** Infos de renouvellement (uniquement pour REFILL_DUE) */
   refill?: RefillInfo;
+  /**
+   * Réglage praticien décidé à la création (modifiable ensuite) : si vrai, le passage en
+   * REFILL_DUE est visible et actionnable côté patient (Refill 1-Clic + notification
+   * automatique). Si faux, le praticien garde la main : le patient continue de voir sa cure
+   * comme IN_PROGRESS, à charge pour le praticien de le recontacter manuellement.
+   */
+  autoRefillEnabled: boolean;
+  /** Nombre total de boîtes prévues pour la cure, commandées une par une (1ère boîte incluse). */
+  plannedContainers: number;
+}
+
+/** Message échangé autour d'une recommandation (mocké : pas de vrai mail envoyé). */
+export interface PractitionerMessage {
+  id: string;
+  recommendationId: string;
+  /** "practitioner" = envoyé manuellement par le praticien, "system" = déclenché par un refill auto */
+  author: "practitioner" | "system";
+  text: string;
+  /** Date prête à afficher : "05/09/2026" */
+  date: string;
+  read: boolean;
 }
 
 export interface CartLine {

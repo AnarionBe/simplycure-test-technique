@@ -18,9 +18,10 @@ import {
   ShoppingCart,
 } from "lucide-react";
 import Header from "@/components/Header";
-import { recommendations as ALL_RECS } from "@/data/mockData";
 import { formatEuro, shortDoctor, withDiscount } from "@/lib/format";
 import { useCart } from "@/lib/cart";
+import { getPatientView } from "@/lib/refill";
+import { useRecommendations } from "@/lib/recommendations";
 import type { Product, Recommendation } from "@/types/recommendation";
 
 const STATUS_STYLES: Record<Recommendation["status"], string> = {
@@ -34,6 +35,7 @@ const STATUS_STYLES: Record<Recommendation["status"], string> = {
  * Colonne gauche — même contenu que la carte, en plus grand
  * ───────────────────────────────────────────────────────────── */
 function RecoOverview({ rec }: { rec: Recommendation }) {
+  const view = getPatientView(rec);
   return (
     <div className="space-y-6 lg:col-span-2">
       {/* En-tête praticien + statut */}
@@ -54,10 +56,10 @@ function RecoOverview({ rec }: { rec: Recommendation }) {
           </div>
         </div>
         <span
-          className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${STATUS_STYLES[rec.status]}`}
+          className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${STATUS_STYLES[view.status]}`}
         >
-          {rec.status === "COMPLETED" && <Check className="h-3.5 w-3.5" />}
-          {rec.statusLabel}
+          {view.status === "COMPLETED" && <Check className="h-3.5 w-3.5" />}
+          {view.statusLabel}
         </span>
       </div>
 
@@ -118,8 +120,8 @@ function RecoOverview({ rec }: { rec: Recommendation }) {
         </div>
       </div>
 
-      {/* Bloc contextuel selon le statut */}
-      {rec.status === "IN_PROGRESS" && rec.progress && (
+      {/* Bloc contextuel selon le statut vu par le patient */}
+      {view.status === "IN_PROGRESS" && rec.progress && (
         <section className="rounded-2xl border border-blue-200 bg-blue-50/60 p-5">
           <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-blue-700">
             Suivi de la cure
@@ -146,7 +148,7 @@ function RecoOverview({ rec }: { rec: Recommendation }) {
         </section>
       )}
 
-      {rec.status === "COMPLETED" && rec.progress && (
+      {view.status === "COMPLETED" && rec.progress && (
         <section className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-5">
           <h2 className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-emerald-700">
             <Check className="h-3.5 w-3.5" />
@@ -172,7 +174,7 @@ function RecoOverview({ rec }: { rec: Recommendation }) {
         </section>
       )}
 
-      {rec.status === "REFILL_DUE" && rec.refill && (
+      {view.status === "REFILL_DUE" && rec.refill && (
         <section className="space-y-3 rounded-2xl border border-amber-200 bg-amber-50/70 p-5">
           <h2 className="text-xs font-semibold uppercase tracking-wide text-amber-700">
             Renouvellement
@@ -370,10 +372,11 @@ export default function RecommendationPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const { cartCount, addRecommendation, addProduct } = useCart();
+  const { recommendations: ALL_RECS } = useRecommendations();
 
   const rec = useMemo(
     () => ALL_RECS.find((r) => r.id === params.id) ?? null,
-    [params.id],
+    [params.id, ALL_RECS],
   );
 
   const goToTab = () => router.push("/");

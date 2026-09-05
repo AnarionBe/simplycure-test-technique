@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/lib/cart";
+import { RecommendationsProvider } from "@/lib/recommendations";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -19,7 +20,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="fr" className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-[#f9fafb] text-slate-900">
-        <CartProvider>{children}</CartProvider>
+        <RecommendationsProvider>
+          <CartProvider>{children}</CartProvider>
+        </RecommendationsProvider>
       </body>
     </html>
   );

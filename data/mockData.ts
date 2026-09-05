@@ -1,4 +1,4 @@
-import type { Practitioner, Recommendation } from "@/types/recommendation";
+import type { Practitioner, Product, Recommendation } from "@/types/recommendation";
 
 /**
  * Praticien prescripteur de la démo.
@@ -67,6 +67,8 @@ export const recommendations: Recommendation[] = [
     ],
     subtotal: 37.32,
     total: 31.72,
+    autoRefillEnabled: true,
+    plannedContainers: 3,
   },
 
   // ─────────────────────────────────────────────────────────────
@@ -104,6 +106,8 @@ export const recommendations: Recommendation[] = [
       totalDays: 90,
       daysRemaining: 70,
     },
+    autoRefillEnabled: true,
+    plannedContainers: 1,
   },
 
   // ─────────────────────────────────────────────────────────────
@@ -147,10 +151,60 @@ export const recommendations: Recommendation[] = [
       authorizationLabel:
         "Dr. De Bona a autorisé 2 renouvellements (Refill 1/2 disponible)",
     },
+    autoRefillEnabled: true,
+    plannedContainers: 3,
   },
 
   // ─────────────────────────────────────────────────────────────
-  // CARTE 4 — COMPLETED : cure terminée, historique + rachat rapide
+  // CARTE 5 — REFILL_DUE en mode MANUEL : le pot arrive à épuisement
+  // mais l'auto-refill est désactivé -> côté patient la carte reste
+  // affichée comme une cure IN_PROGRESS classique (aucune alerte),
+  // c'est au praticien de relancer le patient depuis son espace dédié.
+  // ─────────────────────────────────────────────────────────────
+  {
+    id: "rec-ashwagandha-manuel",
+    status: "REFILL_DUE",
+    statusLabel: "À renouveler",
+    date: "20/08/2026",
+    practitioner: drDeBona,
+    practitionerNote:
+      "Marco, on garde un œil ensemble sur l'ashwagandha avant de relancer un pot : je préfère qu'on refasse le point ensemble, donc pas de renouvellement automatique de mon côté.",
+    durationLabel: "Suivi manuel par le praticien",
+    products: [
+      {
+        id: "prod-ashwagandha-manuel",
+        name: "Ashwagandha KSM-66",
+        brand: "Ashwagandha KSM-66",
+        price: 18.9,
+        accent: "#7c3aed",
+        posology: {
+          dose: "2 gélules",
+          frequency: "1x/jour le soir",
+          label: "2 gélules 1x/jour le soir",
+          containerLabel: "Pot de 60 gélules = 20 jours de traitement",
+          daysPerContainer: 20,
+        },
+      },
+    ],
+    subtotal: 18.9,
+    total: 16.07,
+    refill: {
+      authorizedRefills: 1,
+      usedRefills: 0,
+      currentRefillIndex: 1,
+      daysUntilEmpty: 2,
+      currentDay: 18,
+      cycleDays: 20,
+      alertLabel: "Fin de votre pot dans 2 jours (Jour 18/20)",
+      authorizationLabel:
+        "Suivi manuel : Dr. De Bona valide chaque renouvellement avant de le relancer",
+    },
+    autoRefillEnabled: false,
+    plannedContainers: 2,
+  },
+
+  // ─────────────────────────────────────────────────────────────
+  // CARTE 6 — COMPLETED : cure terminée, historique + rachat rapide
   // ─────────────────────────────────────────────────────────────
   {
     id: "rec-omega3-terminee",
@@ -185,5 +239,19 @@ export const recommendations: Recommendation[] = [
       totalDays: 90,
       daysRemaining: 0,
     },
+    autoRefillEnabled: true,
+    plannedContainers: 1,
   },
+];
+
+/**
+ * Petit catalogue produit (dédoublonné depuis les recommandations ci-dessus) utilisé par le
+ * formulaire de création de recommandation côté praticien.
+ */
+export const productCatalog: Product[] = [
+  recommendations[0].products[0], // Thyrostim®
+  recommendations[0].products[1], // Magnésium bisglycinate
+  recommendations[1].products[0], // Vitamine D3 K2-MK7
+  recommendations[3].products[0], // Ashwagandha KSM-66
+  recommendations[4].products[0], // Oméga-3 EPA/DHA
 ];

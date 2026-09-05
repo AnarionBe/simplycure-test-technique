@@ -5,8 +5,9 @@ import { AnimatePresence, motion } from "framer-motion";
 import { RotateCcw, Sparkles, PackageOpen } from "lucide-react";
 import Header from "@/components/Header";
 import RecommendationCard from "@/components/RecommendationCard";
-import { recommendations as ALL_RECS } from "@/data/mockData";
 import { useCart } from "@/lib/cart";
+import { getPatientView } from "@/lib/refill";
+import { useRecommendations } from "@/lib/recommendations";
 import type { NavTab, RecommendationFilter } from "@/types/recommendation";
 
 const FILTERS: { id: RecommendationFilter; label: string }[] = [
@@ -19,24 +20,33 @@ const FILTERS: { id: RecommendationFilter; label: string }[] = [
 
 export default function Home() {
   const { cartCount, isAdded, reset } = useCart();
+  const { recommendations: ALL_RECS } = useRecommendations();
   const [activeTab, setActiveTab] = useState<NavTab>("recommandations");
   const [filter, setFilter] = useState<RecommendationFilter>("ALL");
+
+  // Statuts vus par le patient (un REFILL_DUE en mode manuel reste affiché IN_PROGRESS)
+  const patientStatuses = useMemo(
+    () => ALL_RECS.map((r) => getPatientView(r).status),
+    [ALL_RECS],
+  );
 
   const counts = useMemo(
     () => ({
       ALL: ALL_RECS.length,
-      NEW: ALL_RECS.filter((r) => r.status === "NEW").length,
-      IN_PROGRESS: ALL_RECS.filter((r) => r.status === "IN_PROGRESS").length,
-      REFILL_DUE: ALL_RECS.filter((r) => r.status === "REFILL_DUE").length,
-      COMPLETED: ALL_RECS.filter((r) => r.status === "COMPLETED").length,
+      NEW: patientStatuses.filter((s) => s === "NEW").length,
+      IN_PROGRESS: patientStatuses.filter((s) => s === "IN_PROGRESS").length,
+      REFILL_DUE: patientStatuses.filter((s) => s === "REFILL_DUE").length,
+      COMPLETED: patientStatuses.filter((s) => s === "COMPLETED").length,
     }),
-    [],
+    [ALL_RECS, patientStatuses],
   );
 
   const visibleRecs = useMemo(
     () =>
-      filter === "ALL" ? ALL_RECS : ALL_RECS.filter((r) => r.status === filter),
-    [filter],
+      filter === "ALL"
+        ? ALL_RECS
+        : ALL_RECS.filter((r, i) => patientStatuses[i] === filter),
+    [filter, ALL_RECS, patientStatuses],
   );
 
   const resetDemo = useCallback(() => {

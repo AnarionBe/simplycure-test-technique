@@ -11,6 +11,7 @@ import {
   Clock,
   CalendarDays,
 } from "lucide-react";
+import { getPatientView } from "@/lib/refill";
 import type {
   CartState,
   Posology,
@@ -24,6 +25,7 @@ interface RecommendationCardProps {
 
 /* ── Badge de statut ─────────────────────────────────────────── */
 function StatusBadge({ rec }: { rec: Recommendation }) {
+  const view = getPatientView(rec);
   const styles: Record<Recommendation["status"], string> = {
     NEW: "bg-forest-900 text-white",
     IN_PROGRESS: "bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200",
@@ -33,16 +35,16 @@ function StatusBadge({ rec }: { rec: Recommendation }) {
   };
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${styles[rec.status]}`}
+      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${styles[view.status]}`}
     >
-      {rec.status === "REFILL_DUE" && (
+      {view.status === "REFILL_DUE" && (
         <span className="relative flex h-1.5 w-1.5">
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-500 opacity-75" />
           <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-600" />
         </span>
       )}
-      {rec.status === "COMPLETED" && <Check className="h-3.5 w-3.5" />}
-      {rec.statusLabel}
+      {view.status === "COMPLETED" && <Check className="h-3.5 w-3.5" />}
+      {view.statusLabel}
     </span>
   );
 }
@@ -93,6 +95,7 @@ export default function RecommendationCard({
 }: RecommendationCardProps) {
   const added = cartState === "added";
   const detailHref = `/recommandations/${rec.id}`;
+  const view = getPatientView(rec);
 
   return (
     <motion.article
@@ -103,7 +106,7 @@ export default function RecommendationCard({
       className={`relative flex h-full flex-col overflow-hidden rounded-2xl border bg-white p-5 shadow-sm transition-colors ${
         added
           ? "border-emerald-300 ring-1 ring-emerald-200"
-          : rec.status === "REFILL_DUE"
+          : view.status === "REFILL_DUE"
             ? "border-amber-200"
             : "border-slate-200"
       }`}
@@ -144,8 +147,8 @@ export default function RecommendationCard({
         ))}
       </div>
 
-      {/* Détail contextuel selon le statut */}
-      {rec.status === "IN_PROGRESS" && rec.progress && (
+      {/* Détail contextuel selon le statut vu par le patient */}
+      {view.status === "IN_PROGRESS" && rec.progress && (
         <div className="mt-3">
           <div className="mb-1 flex items-center justify-between text-[11px]">
             <span className="font-medium text-slate-600">
@@ -169,7 +172,7 @@ export default function RecommendationCard({
         </div>
       )}
 
-      {rec.status === "REFILL_DUE" && rec.refill && (
+      {view.status === "REFILL_DUE" && rec.refill && (
         <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
           <p className="flex items-center gap-1.5 text-[13px] font-semibold text-amber-900">
             <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-amber-600" />
@@ -193,7 +196,7 @@ export default function RecommendationCard({
         </div>
       )}
 
-      {rec.status === "COMPLETED" && (
+      {view.status === "COMPLETED" && (
         <div className="mt-3 flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-[13px] font-medium text-emerald-800">
           <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white">
             <Check className="h-3 w-3" />
