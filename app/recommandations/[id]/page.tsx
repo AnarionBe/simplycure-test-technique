@@ -14,9 +14,9 @@ import {
   Pill,
   Plus,
   Quote,
-  ShieldCheck,
   ShoppingCart,
 } from "lucide-react";
+import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import { formatEuro, shortDoctor, withDiscount } from "@/lib/format";
 import { useCart } from "@/lib/cart";
@@ -25,10 +25,13 @@ import { useRecommendations } from "@/lib/recommendations";
 import type { Product, Recommendation } from "@/types/recommendation";
 
 const STATUS_STYLES: Record<Recommendation["status"], string> = {
-  NEW: "bg-forest-900 text-white",
-  IN_PROGRESS: "bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200",
-  REFILL_DUE: "bg-amber-100 text-amber-800 ring-1 ring-inset ring-amber-300",
-  COMPLETED: "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200",
+  NEW: "bg-amber-100 text-amber-800 ring-1 ring-inset ring-amber-200 uppercase tracking-wide",
+  IN_PROGRESS:
+    "bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200 uppercase tracking-wide",
+  REFILL_DUE:
+    "bg-orange-100 text-orange-800 ring-1 ring-inset ring-orange-300 uppercase tracking-wide",
+  COMPLETED:
+    "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200 uppercase tracking-wide",
 };
 
 /* ─────────────────────────────────────────────────────────────
@@ -183,24 +186,6 @@ function RecoOverview({ rec }: { rec: Recommendation }) {
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
             {rec.refill.alertLabel}
           </p>
-          <p className="flex items-start gap-2 text-sm text-slate-700">
-            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-            ✅ {rec.refill.authorizationLabel}
-          </p>
-          <div className="flex gap-2 pt-1">
-            {Array.from({ length: rec.refill.authorizedRefills }).map((_, i) => (
-              <span
-                key={i}
-                className={`flex-1 rounded-md px-2 py-1 text-center text-[11px] font-semibold ${
-                  i < rec.refill!.currentRefillIndex
-                    ? "bg-emerald-600 text-white"
-                    : "bg-white text-slate-400 ring-1 ring-inset ring-slate-200"
-                }`}
-              >
-                Refill {i + 1}
-              </span>
-            ))}
-          </div>
         </section>
       )}
     </div>
@@ -246,7 +231,7 @@ function PurchaseProductCard({
             {formatEuro(unit)}
           </p>
           <p className="mt-0.5 flex items-center justify-end gap-1 text-[11px]">
-            <span className="rounded bg-emerald-100 px-1 py-0.5 font-bold text-emerald-700">
+            <span className="rounded-full bg-mint-100 px-2 py-0.5 font-bold text-mint-700">
               {rec.practitioner.discountLabel}
             </span>
             <span className="text-slate-400 line-through">
@@ -274,7 +259,7 @@ function PurchaseProductCard({
       )}
 
       <div className="mt-3 flex gap-2">
-        <div className="flex items-center rounded-lg border border-slate-200">
+        <div className="flex items-center rounded-full border border-slate-200">
           <button
             onClick={() => setQty((q) => Math.max(1, q - 1))}
             aria-label="Diminuer la quantité"
@@ -326,22 +311,22 @@ function PurchasePanel({
       </div>
 
       {/* Total recommandation */}
-      <div className="rounded-2xl border border-forest-900/10 bg-forest-50 p-4">
-        <p className="text-[11px] font-semibold uppercase tracking-wide text-forest-700/80">
+      <div className="rounded-2xl border border-slate-200 bg-white p-4">
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
           Total recommandation
         </p>
         <div className="mt-1 flex flex-wrap items-baseline gap-2">
-          <span className="text-2xl font-bold text-forest-900">
+          <span className="text-2xl font-bold text-slate-900">
             {formatEuro(rec.total)}
           </span>
           <span className="text-sm text-slate-400 line-through">
             {formatEuro(rec.subtotal)}
           </span>
-          <span className="rounded-full bg-forest-900 px-1.5 py-0.5 text-[11px] font-bold text-white">
+          <span className="rounded-full bg-mint-100 px-2 py-0.5 text-[11px] font-bold text-mint-700">
             {rec.practitioner.discountLabel}
           </span>
         </div>
-        <p className="mt-1 text-xs text-forest-800">
+        <p className="mt-1 text-xs text-mint-700">
           Vous économisez {formatEuro(saved)}
         </p>
         <button
@@ -453,6 +438,7 @@ export default function RecommendationPage() {
           />
         </motion.div>
       </main>
+      <Footer />
     </>
   );
 }

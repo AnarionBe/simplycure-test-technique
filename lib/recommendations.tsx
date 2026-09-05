@@ -11,6 +11,7 @@ import {
 import { recommendations as SEED_RECS, drDeBona } from "@/data/mockData";
 import { withDiscount } from "@/lib/format";
 import type {
+  Patient,
   PractitionerMessage,
   Product,
   Recommendation,
@@ -27,6 +28,7 @@ interface PersistedState {
 }
 
 export interface NewRecommendationInput {
+  patient: Patient;
   products: Product[];
   practitionerNote: string;
   durationLabel?: string;
@@ -187,6 +189,7 @@ export function RecommendationsProvider({
         statusLabel: "Non consultée",
         date: todayLabel(),
         practitioner: drDeBona,
+        patient: input.patient,
         products: input.products,
         practitionerNote: input.practitionerNote,
         durationLabel: input.durationLabel,

@@ -5,14 +5,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart, Bell, Search, Stethoscope, UserRound } from "lucide-react";
+import { drDeBona, patientCamille } from "@/data/mockData";
 import { useRecommendations } from "@/lib/recommendations";
 import { isAutoRefillAlert } from "@/lib/refill";
 import type { NavTab } from "@/types/recommendation";
 
 const TABS: { id: NavTab; label: string }[] = [
-  { id: "catalogue", label: "Catalogue" },
-  { id: "commandes", label: "Commandes" },
   { id: "recommandations", label: "Recommandations" },
+  { id: "commandes", label: "Commandes" },
+  { id: "catalogue", label: "Catalogue" },
 ];
 
 interface HeaderProps {
@@ -155,22 +156,16 @@ export default function Header({
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-5">
         {/* Logo */}
         <div className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-forest-900 text-white">
-            <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
-              <path
-                fill="currentColor"
-                d="M12 2c1.5 4 5 5.5 5 9a5 5 0 0 1-10 0c0-3.5 3.5-5 5-9Z"
-              />
-              <path
-                fill="currentColor"
-                opacity="0.55"
-                d="M12 13c-1 2.6-3.4 3.6-3.4 6A3.4 3.4 0 0 0 12 22a3.4 3.4 0 0 0 3.4-3c0-2.4-2.4-3.4-3.4-6Z"
-              />
-            </svg>
-          </span>
-          <span className="text-[17px] font-semibold tracking-tight text-forest-900">
-            Simplycure
-          </span>
+          <svg viewBox="0 0 24 24" className="h-7 w-7 text-forest-900" aria-hidden="true">
+            <path
+              fill="currentColor"
+              d="M12 2c1.5 4 5 5.5 5 9a5 5 0 0 1-10 0c0-3.5 3.5-5 5-9Z"
+            />
+            <path
+              fill="currentColor"
+              d="M12 13c-1 2.6-3.4 3.6-3.4 6A3.4 3.4 0 0 0 12 22a3.4 3.4 0 0 0 3.4-3c0-2.4-2.4-3.4-3.4-6Z"
+            />
+          </svg>
         </div>
 
         {/* Onglets (masqués côté espace praticien) */}
@@ -230,25 +225,9 @@ export default function Header({
               </button>
               <NotificationsBell />
 
-              {/* Panier avec badge dynamique */}
-              <button className="relative flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50">
-                <span className="relative">
-                  <ShoppingCart className="h-[18px] w-[18px]" />
-                  <AnimatePresence>
-                    {cartCount > 0 && (
-                      <motion.span
-                        key={cartCount}
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        exit={{ scale: 0 }}
-                        transition={{ type: "spring", stiffness: 500, damping: 22 }}
-                        className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-emerald-600 px-1 text-[10px] font-bold text-white"
-                      >
-                        {cartCount}
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
-                </span>
+              {/* Panier */}
+              <button className="flex items-center gap-2 rounded-lg bg-forest-900 px-3.5 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-forest-800">
+                <ShoppingCart className="h-[18px] w-[18px]" />
                 <span className="hidden sm:inline">
                   Mon panier{cartCount > 0 ? ` (${cartCount})` : ""}
                 </span>
@@ -257,8 +236,8 @@ export default function Header({
           )}
 
           {/* Avatar */}
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-forest-900 text-xs font-semibold text-white ring-2 ring-white">
-            MD
+          <span className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-forest-700 bg-white text-xs font-semibold text-forest-900">
+            {inPraticienSpace ? drDeBona.initials : patientCamille.initials}
           </span>
         </div>
       </div>

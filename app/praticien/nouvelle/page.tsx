@@ -7,7 +7,7 @@ import { ArrowLeft } from "lucide-react";
 import AutoRefillToggle from "@/components/AutoRefillToggle";
 import Header from "@/components/Header";
 import ProductPicker from "@/components/ProductPicker";
-import { productCatalog } from "@/data/mockData";
+import { patients, productCatalog } from "@/data/mockData";
 import { useRecommendations } from "@/lib/recommendations";
 import type { Product } from "@/types/recommendation";
 
@@ -15,6 +15,7 @@ export default function NouvelleRecommandationPage() {
   const router = useRouter();
   const { createRecommendation } = useRecommendations();
 
+  const [patientId, setPatientId] = useState(patients[0].id);
   const [selectedProducts, setSelectedProducts] = useState<Product[]>([
     productCatalog[0],
   ]);
@@ -27,7 +28,9 @@ export default function NouvelleRecommandationPage() {
 
   const handleSubmit = () => {
     if (!canSubmit) return;
+    const patient = patients.find((p) => p.id === patientId) ?? patients[0];
     createRecommendation({
+      patient,
       products: selectedProducts,
       practitionerNote: note.trim(),
       durationLabel: durationLabel.trim() || undefined,
@@ -50,14 +53,30 @@ export default function NouvelleRecommandationPage() {
           Retour au suivi
         </Link>
 
-        <h1 className="mt-4 text-2xl font-bold tracking-tight text-slate-900">
+        <h1 className="mt-4 font-serif text-2xl font-semibold tracking-tight text-slate-900">
           Nouvelle recommandation
         </h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Dr. Marco De Bona · patient unique de la démo
-        </p>
+        <p className="mt-1 text-sm text-slate-500">Dr. Marco De Bona</p>
 
         <div className="mt-6 space-y-6">
+          {/* Patient */}
+          <div>
+            <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+              Patient
+            </h2>
+            <select
+              value={patientId}
+              onChange={(e) => setPatientId(e.target.value)}
+              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-forest-400"
+            >
+              {patients.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* Produits */}
           <div>
             <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">

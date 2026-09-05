@@ -3,9 +3,11 @@
 import { useCallback, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { RotateCcw, Sparkles, PackageOpen } from "lucide-react";
+import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import RecommendationCard from "@/components/RecommendationCard";
 import CompletedRecommendationRow from "@/components/CompletedRecommendationRow";
+import { CURRENT_PATIENT_ID, drDeBona } from "@/data/mockData";
 import { useCart } from "@/lib/cart";
 import { getPatientView } from "@/lib/refill";
 import { useRecommendations } from "@/lib/recommendations";
@@ -21,7 +23,11 @@ const FILTERS: { id: RecommendationFilter; label: string }[] = [
 
 export default function Home() {
   const { cartCount, isAdded, reset } = useCart();
-  const { recommendations: ALL_RECS } = useRecommendations();
+  const { recommendations: ALL_PATIENTS_RECS } = useRecommendations();
+  const ALL_RECS = useMemo(
+    () => ALL_PATIENTS_RECS.filter((r) => r.patient.id === CURRENT_PATIENT_ID),
+    [ALL_PATIENTS_RECS],
+  );
   const [activeTab, setActiveTab] = useState<NavTab>("recommandations");
   const [filter, setFilter] = useState<RecommendationFilter>("ALL");
 
@@ -76,6 +82,18 @@ export default function Home() {
         onTabChange={setActiveTab}
       />
 
+      <section className="w-full bg-gradient-to-br from-forest-700 via-forest-800 to-forest-900 px-5 py-10">
+        <div className="mx-auto max-w-6xl">
+          <p className="text-xs font-medium uppercase tracking-[0.2em] text-forest-50/70">
+            Votre suivi avec
+          </p>
+          <h1 className="mt-1 font-serif text-4xl font-semibold text-white">
+            {drDeBona.name}
+          </h1>
+          <p className="mt-1 text-sm text-forest-50/80">{drDeBona.title}</p>
+        </div>
+      </section>
+
       <main className="mx-auto w-full max-w-6xl flex-1 px-5 py-8">
         {activeTab !== "recommandations" ? (
           <div className="mt-10 flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white/60 py-20 text-center">
@@ -107,7 +125,7 @@ export default function Home() {
             {/* Titre */}
             <div className="mt-6 flex flex-wrap items-end justify-between gap-3">
               <div>
-                <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+                <h1 className="font-serif text-2xl font-semibold tracking-tight text-slate-900">
                   Cockpit de suivi de cure
                 </h1>
                 <p className="mt-1 text-sm text-slate-500">
@@ -204,6 +222,7 @@ export default function Home() {
           </>
         )}
       </main>
+      <Footer />
     </>
   );
 }

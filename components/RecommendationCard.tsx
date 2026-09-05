@@ -27,11 +27,13 @@ interface RecommendationCardProps {
 function StatusBadge({ rec }: { rec: Recommendation }) {
   const view = getPatientView(rec);
   const styles: Record<Recommendation["status"], string> = {
-    NEW: "bg-forest-900 text-white",
-    IN_PROGRESS: "bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200",
-    REFILL_DUE: "bg-amber-100 text-amber-800 ring-1 ring-inset ring-amber-300",
+    NEW: "bg-amber-100 text-amber-800 ring-1 ring-inset ring-amber-200 uppercase tracking-wide",
+    IN_PROGRESS:
+      "bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200 uppercase tracking-wide",
+    REFILL_DUE:
+      "bg-orange-100 text-orange-800 ring-1 ring-inset ring-orange-300 uppercase tracking-wide",
     COMPLETED:
-      "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200",
+      "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200 uppercase tracking-wide",
   };
   return (
     <span

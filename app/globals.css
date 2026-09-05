@@ -9,6 +9,8 @@
   --forest-800: #174a3a;
   --forest-700: #1f5c48;
   --forest-50: #ecf5f1;
+  --mint-100: #e3f2ea;
+  --mint-700: #146c43;
 }
 
 @theme inline {
@@ -18,7 +20,10 @@
   --color-forest-800: var(--forest-800);
   --color-forest-700: var(--forest-700);
   --color-forest-50: var(--forest-50);
+  --color-mint-100: var(--mint-100);
+  --color-mint-700: var(--mint-700);
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-lora), Georgia, "Times New Roman", serif;
 }
 
 * {

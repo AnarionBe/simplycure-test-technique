@@ -31,6 +31,14 @@ export interface Practitioner {
   discountRate: number;
 }
 
+export interface Patient {
+  id: string;
+  /** "Camille Laurent" */
+  name: string;
+  /** Initiales affichées dans l'avatar : "CL" */
+  initials: string;
+}
+
 export interface Posology {
   /** "4 gélules" */
   dose: string;
@@ -95,6 +103,7 @@ export interface Recommendation {
   /** Date d'émission : "03/09/2026" */
   date: string;
   practitioner: Practitioner;
+  patient: Patient;
   products: Product[];
   /** Mot du praticien affiché dans la modale de détail */
   practitionerNote: string;
