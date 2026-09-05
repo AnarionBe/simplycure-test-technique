@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { RotateCcw, Sparkles, PackageOpen } from "lucide-react";
 import Header from "@/components/Header";
 import RecommendationCard from "@/components/RecommendationCard";
+import CompletedRecommendationRow from "@/components/CompletedRecommendationRow";
 import { useCart } from "@/lib/cart";
 import { getPatientView } from "@/lib/refill";
 import { useRecommendations } from "@/lib/recommendations";
@@ -48,6 +49,19 @@ export default function Home() {
         : ALL_RECS.filter((r, i) => patientStatuses[i] === filter),
     [filter, ALL_RECS, patientStatuses],
   );
+
+  // Les cures terminées n'ont plus besoin d'une carte complète : elles sont
+  // regroupées à part, en liste compacte.
+  const { activeRecs, completedRecs } = useMemo(() => {
+    const active: typeof visibleRecs = [];
+    const completed: typeof visibleRecs = [];
+    for (const rec of visibleRecs) {
+      (getPatientView(rec).status === "COMPLETED" ? completed : active).push(
+        rec,
+      );
+    }
+    return { activeRecs: active, completedRecs: completed };
+  }, [visibleRecs]);
 
   const resetDemo = useCallback(() => {
     reset();
@@ -146,21 +160,47 @@ export default function Home() {
               })}
             </div>
 
-            {/* Grille de cartes */}
-            <motion.div
-              layout
-              className="mt-6 grid grid-cols-1 items-stretch gap-5 md:grid-cols-2 xl:grid-cols-3"
-            >
-              <AnimatePresence mode="popLayout">
-                {visibleRecs.map((rec) => (
-                  <RecommendationCard
-                    key={rec.id}
-                    recommendation={rec}
-                    cartState={isAdded(rec.id) ? "added" : "idle"}
-                  />
-                ))}
-              </AnimatePresence>
-            </motion.div>
+            {/* Section "En cours" : display actuel, inchangé */}
+            {activeRecs.length > 0 && (
+              <div className="mt-6">
+                <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  En cours ({activeRecs.length})
+                </h2>
+                <motion.div
+                  layout
+                  className="grid grid-cols-1 items-stretch gap-5 md:grid-cols-2 xl:grid-cols-3"
+                >
+                  <AnimatePresence mode="popLayout">
+                    {activeRecs.map((rec) => (
+                      <RecommendationCard
+                        key={rec.id}
+                        recommendation={rec}
+                        cartState={isAdded(rec.id) ? "added" : "idle"}
+                      />
+                    ))}
+                  </AnimatePresence>
+                </motion.div>
+              </div>
+            )}
+
+            {/* Section "Terminées" : liste de cards inline compactes */}
+            {completedRecs.length > 0 && (
+              <div className={activeRecs.length > 0 ? "mt-8" : "mt-6"}>
+                <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  Terminées ({completedRecs.length})
+                </h2>
+                <motion.div layout className="space-y-2">
+                  <AnimatePresence mode="popLayout">
+                    {completedRecs.map((rec) => (
+                      <CompletedRecommendationRow
+                        key={rec.id}
+                        recommendation={rec}
+                      />
+                    ))}
+                  </AnimatePresence>
+                </motion.div>
+              </div>
+            )}
           </>
         )}
       </main>
