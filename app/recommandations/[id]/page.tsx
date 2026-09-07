@@ -204,7 +204,9 @@ function PurchaseProductCard({
   product: Product;
   onAdd: (product: Product, quantity: number) => void;
 }) {
-  const [qty, setQty] = useState(1);
+  // Quand la cure nécessite plusieurs boîtes, la quantité par défaut s'aligne
+  // sur ce nombre plutôt que de rester à 1.
+  const [qty, setQty] = useState(Math.max(1, rec.plannedContainers));
   const unit = withDiscount(product.price, rec.practitioner.discountRate);
 
   return (
@@ -255,6 +257,12 @@ function PurchaseProductCard({
               {product.posology.label}
             </span>
           </div>
+          {rec.plannedContainers > 1 && (
+            <p className="mt-1.5 text-[11px] text-slate-400">
+              {rec.plannedContainers} boîtes nécessaires pour couvrir la cure —
+              quantité pré-remplie.
+            </p>
+          )}
         </div>
       )}
 
