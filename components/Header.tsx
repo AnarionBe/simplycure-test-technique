@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart, Bell, Search, Stethoscope, UserRound } from "lucide-react";
+import Logo from "@/components/Logo";
 import { drDeBona, patientCamille } from "@/data/mockData";
 import { useRecommendations } from "@/lib/recommendations";
 import { isAutoRefillAlert } from "@/lib/refill";
@@ -155,18 +156,9 @@ export default function Header({
     <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/85 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-5">
         {/* Logo */}
-        <div className="flex items-center gap-2">
-          <svg viewBox="0 0 24 24" className="h-7 w-7 text-forest-900" aria-hidden="true">
-            <path
-              fill="currentColor"
-              d="M12 2c1.5 4 5 5.5 5 9a5 5 0 0 1-10 0c0-3.5 3.5-5 5-9Z"
-            />
-            <path
-              fill="currentColor"
-              d="M12 13c-1 2.6-3.4 3.6-3.4 6A3.4 3.4 0 0 0 12 22a3.4 3.4 0 0 0 3.4-3c0-2.4-2.4-3.4-3.4-6Z"
-            />
-          </svg>
-        </div>
+        <Link href="/" aria-label="Simplycure — accueil" className="flex items-center">
+          <Logo className="h-6 w-auto text-forest-900" />
+        </Link>
 
         {/* Onglets (masqués côté espace praticien) */}
         {!inPraticienSpace && (
